@@ -1,0 +1,11 @@
+---
+title: "hw2_code"
+author: "YuechenLiu"
+date: "9/30/2020"
+output: html_document
+---
+```{r setup}
+library(tidyverse)
+library(readxl)
+```
+
