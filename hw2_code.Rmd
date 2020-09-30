@@ -104,12 +104,15 @@ The dataset contains variables including line, station name, station latitude, s
 ##Using these data:
 There are `r nrow(NYC_df %>% distinct (line, station_name))` distinct stations.
 There are `r nrow(filter(NYC_df,ada == 'TRUE' ) %>% distinct(line, station_name))` stations that are ADA compliant.
-The proportion of station entrances / exits without vending allow entrance is `r nrow(filter(NYC_df, vending == 'NO', entry == 'TRUE'))/r nrow(filter(NYC_df, vending == 'NO'))`
+The proportion of station entrances / exits without vending allow entrance is `r nrow(filter(NYC_df, vending == 'NO', entry == 'TRUE'))`divide by `r nrow(filter(NYC_df, vending == 'NO'))` (which the answer is ~37.7%)
 
-There are `r nrow(filter(NYC_df, route_name == 'A') %>% distinct (line, station_name))`stations that serve A train.
+There are `r filter(NYC_df, route_name == 'A') %>% distinct (line, station_name) %>%nrow()` stations that serve A train.
 Of the stations that serve the A train, there are `r nrow(filter(NYC_df, route_name == 'A', ada == 'TRUE') %>% distinct (line, station_name))` stations that are ADA compliant.
 
 
+## Problem 3
+
+Read the 
 
 
 
