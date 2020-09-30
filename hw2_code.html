@@ -379,6 +379,69 @@ summary {
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code>library(readxl)</code></pre>
+<div id="problem-1" class="section level2">
+<h2>Problem 1</h2>
+<p>Read the Mr. Trashwheel dataset.</p>
+<pre class="r"><code>trashwheel_df =
+  read_xlsx(
+    &quot;./Trash-Wheel-Collection-Totals-8-6-19.xlsx&quot;,
+    sheet = &#39;Mr. Trash Wheel&#39;,
+    range = cell_cols(&#39;A:N&#39;)) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  drop_na(dumpster) %&gt;% 
+  mutate(
+    sports_balls = round(sports_balls),
+    sports_balls = as.integer(sports_balls)
+  )</code></pre>
+<p>Read precipitation data for 2018 and 2017.</p>
+<pre class="r"><code>precip_2018 = 
+  read_excel(
+    &quot;./Trash-Wheel-Collection-Totals-8-6-19.xlsx&quot;,
+    sheet = &#39;2018 Precipitation&#39;,
+    skip = 1
+  ) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  drop_na(month) %&gt;% 
+  mutate(year = 2018) %&gt;% 
+  relocate(year)
+
+precip_2017 = 
+  read_excel(
+    &quot;./Trash-Wheel-Collection-Totals-8-6-19.xlsx&quot;,
+    sheet = &#39;2017 Precipitation&#39;,
+    skip = 1
+  ) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  drop_na(month) %&gt;% 
+  mutate(year = 2017) %&gt;% 
+  relocate(year)</code></pre>
+<p>Now combine annual precipitation.</p>
+<pre class="r"><code>month_df = 
+  tibble(
+    month = 1:12,
+    month_name = month.name
+  )
+
+precip_df = 
+  bind_rows(precip_2018,precip_2017) 
+
+left_join(precip_df, month_df, by = &quot;month&quot;)</code></pre>
+<pre><code>## # A tibble: 24 x 4
+##     year month total month_name
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;     
+##  1  2018     1  0.94 January   
+##  2  2018     2  4.8  February  
+##  3  2018     3  2.69 March     
+##  4  2018     4  4.69 April     
+##  5  2018     5  9.27 May       
+##  6  2018     6  4.77 June      
+##  7  2018     7 10.2  July      
+##  8  2018     8  6.45 August    
+##  9  2018     9 10.5  September 
+## 10  2018    10  2.12 October   
+## # … with 14 more rows</code></pre>
+<p>This dataset contains information from the Mr. Trashwheel trash collector in Baltimore, Maryland. As trash enters the inner harbor, the trashwheel collects that trash, and stores it in a dumpster. The dataset contains information on year, month, and trash collected, include some specific kinds of trash. There are a total of ‘r nrows(trashwheel_df)’ rows in our final dataset. Additional data sheets include month precipitation data.</p>
+</div>
 
 
 
