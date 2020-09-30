@@ -79,8 +79,43 @@ Read the NYC Transit dataset.
 NYC_df = 
   read_csv("./NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>% 
   janitor::clean_names() %>% 
-  select(NYC_df, "","")
+  select(line, station_name, station_latitude, station_longitude, route1:route11, entry, vending, entrance_type, ada)
 ```
+
+Manage the data.
+
+```{r}
+NYC_df = 
+  mutate(NYC_df, entry = ifelse(entry%in%c('YES'), TRUE, FALSE)) %>%
+  mutate_at(vars(route8:route11), as.character) %>%
+  pivot_longer(
+    route1:route11,
+    names_to = 'route_name',
+    values_to = 'route_number',
+  ) 
+```
+
+##Summary
+
+This dataset describes detailed information for NYC Subway. Firstly, I loaded the data. Then I used janitor to make variables look more succinct. The select function was applied to keep only the variables that we want. In order to combine the 11 routes, we need to convert numerical factors to logical ones.
+
+The dataset contains variables including line, station name, station latitude, station longitude, entry, vending, entrance type, ada, route number and route name, or we can summary them as `r names(NYC_df)`. There are a total of `r nrow(NYC_df)` rows and `r ncol(NYC_df)` columns in our final dataset.  
+
+##Using these data:
+There are `r nrow(NYC_df %>% distinct (line, station_name))` distinct stations.
+There are `r nrow(filter(NYC_df,ada == 'TRUE' ) %>% distinct(line, station_name))` stations that are ADA compliant.
+The proportion of station entrances / exits without vending allow entrance is `r nrow(filter(NYC_df, vending == 'NO', entry == 'TRUE'))/r nrow(filter(NYC_df, vending == 'NO'))`
+
+There are `r nrow(filter(NYC_df, route_name == 'A') %>% distinct (line, station_name))`stations that serve A train.
+Of the stations that serve the A train, there are `r nrow(filter(NYC_df, route_name == 'A', ada == 'TRUE') %>% distinct (line, station_name))` stations that are ADA compliant.
+
+
+
+
+
+
+
+
 
 
 
