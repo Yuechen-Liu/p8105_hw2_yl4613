@@ -92,7 +92,8 @@ The dataset contains variables including line, station name, station latitude, s
 ##Using these data:
 There are `r nrow(NYC_df %>% distinct (line, station_name))` distinct stations.
 There are `r nrow(filter(NYC_df,ada == 'TRUE' ) %>% distinct(line, station_name))` stations that are ADA compliant.
-The proportion of station entrances / exits without vending allow entrance is `r nrow(filter(NYC_df, vending == 'NO', entry == 'TRUE'))`divide by `r nrow(filter(NYC_df, vending == 'NO'))` (which the answer is ~37.7%)
+
+This dataset is a little bit better than raw data, but not tidy enough.
 
 Manage the data.
 
@@ -107,11 +108,10 @@ NYC_df =
   ) 
 ```
 
+The proportion of station entrances / exits without vending allow entrance is `r nrow(filter(NYC_df, vending == "NO", entry == "TRUE"))` divide by `r nrow(filter(NYC_df, vending == "NO"))` (which the answer is ~37.7%)
  
-
-
 ```{r}
-NYC_A = filter(NYC_df, route_name == 'A')
+NYC_A = filter(NYC_df, route_number == 'A')
 ```
 There are `r count(distinct (NYC_A, line, station_name))` stations that serve A train.
 Of the stations that serve the A train, there are `r filter(NYC_A, ada == 'TRUE') %>% distinct (line, station_name) %>% nrow` stations that are ADA compliant.
@@ -166,10 +166,20 @@ UN = read.csv(
 
 Merging SNP into POLS, then merging Unemployment:
 ```{r}
-left_join(PM,SNP,by=c('year','month')) %>% 
+Merged = 
+  left_join(PM,SNP,by=c('year','month')) %>% 
   left_join(UN,by=c('year','month'))
 ```
 
+##Summary
+The pols-month dataset tells us number of different government officials and which party the president was in at specific times.
+The SNP dataset tells us the closing values of the S&P stock index on the associated dates.
+The Unemployment dataset tells us percentage of unemployment every month of the year since 1948.
+
+The final result dataset, which is called Merged, has `r nrow(Merged)` rows and `r ncol(Merged)` columns.
+It's year range is from `r (head(Merged$year,1))` to `r (tail(Merged$year,1))`.
+
+It has the following variables: `r ls(Merged)`, among them, we used year and month as key variables when merging them.
 
 
 

@@ -440,7 +440,86 @@ left_join(precip_df, month_df, by = &quot;month&quot;)</code></pre>
 ##  9  2018     9 10.5  September 
 ## 10  2018    10  2.12 October   
 ## # … with 14 more rows</code></pre>
-<p>This dataset contains information from the Mr. Trashwheel trash collector in Baltimore, Maryland. As trash enters the inner harbor, the trashwheel collects that trash, and stores it in a dumpster. The dataset contains information on year, month, and trash collected, include some specific kinds of trash. There are a total of ‘r nrows(trashwheel_df)’ rows in our final dataset. Additional data sheets include month precipitation data.</p>
+<p>This dataset contains information from the Mr. Trashwheel trash collector in Baltimore, Maryland. As trash enters the inner harbor, the trashwheel collects that trash, and stores it in a dumpster. The dataset contains information on year, month, and trash collected, include some specific kinds of trash. There are a total of 344 rows in our final dataset. Additional data sheets include month precipitation data.</p>
+</div>
+<div id="problem-2" class="section level2">
+<h2>Problem 2</h2>
+<p>Read the NYC Transit dataset.</p>
+<pre class="r"><code>NYC_df = 
+  read_csv(&quot;./NYC_Transit_Subway_Entrance_And_Exit_Data.csv&quot;) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  select(line, station_name, station_latitude, station_longitude, route1:route11, entry, vending, entrance_type, ada)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   .default = col_character(),
+##   `Station Latitude` = col_double(),
+##   `Station Longitude` = col_double(),
+##   Route8 = col_double(),
+##   Route9 = col_double(),
+##   Route10 = col_double(),
+##   Route11 = col_double(),
+##   ADA = col_logical(),
+##   `Free Crossover` = col_logical(),
+##   `Entrance Latitude` = col_double(),
+##   `Entrance Longitude` = col_double()
+## )</code></pre>
+<pre><code>## See spec(...) for full column specifications.</code></pre>
+<p>##Summary</p>
+<p>This dataset describes detailed information for NYC Subway. Firstly, I loaded the data. Then I used janitor to make variables look more succinct. The select function was applied to keep only the variables that we want. In order to combine the 11 routes, we need to convert numerical factors to logical ones.</p>
+<p>The dataset contains variables including line, station name, station latitude, station longitude, entry, vending, entrance type, ada, route number and route name, or we can summary them as line, station_name, station_latitude, station_longitude, route1, route2, route3, route4, route5, route6, route7, route8, route9, route10, route11, entry, vending, entrance_type, ada. There are a total of 1868 rows and 19 columns in our final dataset.</p>
+<p>##Using these data: There are 465 distinct stations. There are 84 stations that are ADA compliant.</p>
+<p>This dataset is a little bit better than raw data, but not tidy enough.</p>
+<p>Manage the data.</p>
+<pre class="r"><code>NYC_df = 
+  mutate(NYC_df, entry = ifelse(entry%in%c(&#39;YES&#39;), TRUE, FALSE)) %&gt;%
+  mutate_at(vars(route8:route11), as.character) %&gt;%
+  pivot_longer(
+    route1:route11,
+    names_to = &#39;route_name&#39;,
+    values_to = &#39;route_number&#39;,
+  ) </code></pre>
+<p>The proportion of station entrances / exits without vending allow entrance is 759 divide by 2013 (which the answer is ~37.7%)</p>
+<pre class="r"><code>NYC_A = filter(NYC_df, route_number == &#39;A&#39;)</code></pre>
+<p>There are 60 stations that serve A train. Of the stations that serve the A train, there are 17 stations that are ADA compliant.</p>
+<p>##Problem 3</p>
+<p>The pols-month dataset:</p>
+<pre class="r"><code>PM = read.csv(
+  &#39;./pols-month.csv&#39;) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  separate(mon, c(&#39;year&#39;,&#39;month&#39;,&#39;day&#39;)) %&gt;%
+  mutate(
+    month = recode(month, &#39;01&#39; = &#39;January&#39;, &#39;02&#39; = &#39;February&#39;, &#39;03&#39; = &#39;March&#39;, &#39;04&#39; = &#39;April&#39;, &#39;05&#39; = &#39;May&#39;, &#39;06&#39; = &#39;June&#39;, &#39;07&#39; = &#39;July&#39;, &#39;08&#39; = &#39;August&#39;, &#39;09&#39; = &#39;September&#39;, &#39;10&#39; = &#39;October&#39;, &#39;11&#39; = &#39;November&#39;, &#39;12&#39; =&#39;December&#39;)) %&gt;% 
+  mutate(
+    president = recode(prez_gop, &#39;0&#39; = &#39;democrat&#39;, &#39;1&#39; = &#39;republic&#39;, &#39;2&#39; = &#39;republic&#39;)
+  ) %&gt;% 
+  select(-&#39;prez_dem&#39;, -&#39;prez_gop&#39;, -&#39;day&#39;)</code></pre>
+<p>The snp dataset:</p>
+<pre class="r"><code>SNP = read.csv(
+  &#39;./snp.csv&#39;) %&gt;%
+  janitor::clean_names() %&gt;%
+  separate(date, c(&#39;month&#39;,&#39;day&#39;,&#39;year&#39;)) %&gt;%
+    mutate(
+    month = recode(month, &#39;1&#39; = &#39;January&#39;, &#39;2&#39; = &#39;February&#39;, &#39;3&#39; = &#39;March&#39;, &#39;4&#39; = &#39;April&#39;, &#39;5&#39; = &#39;May&#39;, &#39;6&#39; = &#39;June&#39;, &#39;7&#39; = &#39;July&#39;, &#39;8&#39; = &#39;August&#39;, &#39;9&#39; = &#39;September&#39;, &#39;10&#39; = &#39;October&#39;, &#39;11&#39; = &#39;November&#39;, &#39;12&#39; =&#39;December&#39;)) %&gt;% 
+  arrange( year, month ) %&gt;% 
+  relocate(year, month ) %&gt;% 
+  select(-&#39;day&#39;)</code></pre>
+<p>The unemployment dataset:</p>
+<pre class="r"><code>UN = read.csv(
+  &#39;./unemployment.csv&#39;) %&gt;% 
+  janitor::clean_names() %&gt;%
+  pivot_longer(jan:dec,
+               names_to = &#39;month&#39;,
+               values_to = &#39;unemployment&#39;) %&gt;% 
+  mutate(
+    month = recode(month, &#39;jan&#39; = &#39;January&#39;, &#39;feb&#39; = &#39;February&#39;, &#39;mar&#39; = &#39;March&#39;, &#39;apr&#39; = &#39;April&#39;, &#39;may&#39; = &#39;May&#39;, &#39;jun&#39; = &#39;June&#39;, &#39;jul&#39; = &#39;July&#39;, &#39;aug&#39; = &#39;August&#39;, &#39;sep&#39; = &#39;September&#39;, &#39;oct&#39; = &#39;October&#39;, &#39;nov&#39; = &#39;November&#39;, &#39;dec&#39; =&#39;December&#39;)) %&gt;% 
+  mutate_at(vars(year), as.character)</code></pre>
+<p>Merging SNP into POLS, then merging Unemployment:</p>
+<pre class="r"><code>Merged = 
+  left_join(PM,SNP,by=c(&#39;year&#39;,&#39;month&#39;)) %&gt;% 
+  left_join(UN,by=c(&#39;year&#39;,&#39;month&#39;))</code></pre>
+<p>##Summary The pols-month dataset tells us number of different government officials and which party the president was in at specific times. The SNP dataset tells us the closing values of the S&amp;P stock index on the associated dates. The Unemployment dataset tells us percentage of unemployment every month of the year since 1948.</p>
+<p>The final result dataset, which is called Merged, has 822 rows and 11 columns. It’s year range is from 1947 to 2015.</p>
+<p>It has the following variables: close, gov_dem, gov_gop, month, president, rep_dem, rep_gop, sen_dem, sen_gop, unemployment, year, among them, we used year and month as key variables when merging them.</p>
 </div>
 
 
