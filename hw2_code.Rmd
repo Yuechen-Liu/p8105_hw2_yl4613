@@ -82,6 +82,18 @@ NYC_df =
   select(line, station_name, station_latitude, station_longitude, route1:route11, entry, vending, entrance_type, ada)
 ```
 
+##Summary
+
+This dataset describes detailed information for NYC Subway. Firstly, I loaded the data. Then I used janitor to make variables look more succinct. The select function was applied to keep only the variables that we want. In order to combine the 11 routes, we need to convert numerical factors to logical ones.
+
+The dataset contains variables including line, station name, station latitude, station longitude, entry, vending, entrance type, ada, route number and route name, or we can summary them as `r names(NYC_df)`. There are a total of `r nrow(NYC_df)` rows and `r ncol(NYC_df)` columns in our final dataset. 
+
+
+##Using these data:
+There are `r nrow(NYC_df %>% distinct (line, station_name))` distinct stations.
+There are `r nrow(filter(NYC_df,ada == 'TRUE' ) %>% distinct(line, station_name))` stations that are ADA compliant.
+The proportion of station entrances / exits without vending allow entrance is `r nrow(filter(NYC_df, vending == 'NO', entry == 'TRUE'))`divide by `r nrow(filter(NYC_df, vending == 'NO'))` (which the answer is ~37.7%)
+
 Manage the data.
 
 ```{r}
@@ -95,24 +107,72 @@ NYC_df =
   ) 
 ```
 
-##Summary
-
-This dataset describes detailed information for NYC Subway. Firstly, I loaded the data. Then I used janitor to make variables look more succinct. The select function was applied to keep only the variables that we want. In order to combine the 11 routes, we need to convert numerical factors to logical ones.
-
-The dataset contains variables including line, station name, station latitude, station longitude, entry, vending, entrance type, ada, route number and route name, or we can summary them as `r names(NYC_df)`. There are a total of `r nrow(NYC_df)` rows and `r ncol(NYC_df)` columns in our final dataset.  
-
-##Using these data:
-There are `r nrow(NYC_df %>% distinct (line, station_name))` distinct stations.
-There are `r nrow(filter(NYC_df,ada == 'TRUE' ) %>% distinct(line, station_name))` stations that are ADA compliant.
-The proportion of station entrances / exits without vending allow entrance is `r nrow(filter(NYC_df, vending == 'NO', entry == 'TRUE'))`divide by `r nrow(filter(NYC_df, vending == 'NO'))` (which the answer is ~37.7%)
-
-There are `r filter(NYC_df, route_name == 'A') %>% distinct (line, station_name) %>%nrow()` stations that serve A train.
-Of the stations that serve the A train, there are `r nrow(filter(NYC_df, route_name == 'A', ada == 'TRUE') %>% distinct (line, station_name))` stations that are ADA compliant.
+ 
 
 
-## Problem 3
+```{r}
+NYC_A = filter(NYC_df, route_name == 'A')
+```
+There are `r count(distinct (NYC_A, line, station_name))` stations that serve A train.
+Of the stations that serve the A train, there are `r filter(NYC_A, ada == 'TRUE') %>% distinct (line, station_name) %>% nrow` stations that are ADA compliant.
 
-Read the 
+
+
+##Problem 3
+
+The pols-month dataset:
+
+```{r}
+PM = read.csv(
+  './pols-month.csv') %>% 
+  janitor::clean_names() %>% 
+  separate(mon, c('year','month','day')) %>%
+  mutate(
+    month = recode(month, '01' = 'January', '02' = 'February', '03' = 'March', '04' = 'April', '05' = 'May', '06' = 'June', '07' = 'July', '08' = 'August', '09' = 'September', '10' = 'October', '11' = 'November', '12' ='December')) %>% 
+  mutate(
+    president = recode(prez_gop, '0' = 'democrat', '1' = 'republic', '2' = 'republic')
+  ) %>% 
+  select(-'prez_dem', -'prez_gop', -'day')
+```
+
+The snp dataset:
+
+```{r}
+SNP = read.csv(
+  './snp.csv') %>%
+  janitor::clean_names() %>%
+  separate(date, c('month','day','year')) %>%
+    mutate(
+    month = recode(month, '1' = 'January', '2' = 'February', '3' = 'March', '4' = 'April', '5' = 'May', '6' = 'June', '7' = 'July', '8' = 'August', '9' = 'September', '10' = 'October', '11' = 'November', '12' ='December')) %>% 
+  arrange( year, month ) %>% 
+  relocate(year, month ) %>% 
+  select(-'day')
+```
+
+The unemployment dataset:
+
+```{r}
+UN = read.csv(
+  './unemployment.csv') %>% 
+  janitor::clean_names() %>%
+  pivot_longer(jan:dec,
+               names_to = 'month',
+               values_to = 'unemployment') %>% 
+  mutate(
+    month = recode(month, 'jan' = 'January', 'feb' = 'February', 'mar' = 'March', 'apr' = 'April', 'may' = 'May', 'jun' = 'June', 'jul' = 'July', 'aug' = 'August', 'sep' = 'September', 'oct' = 'October', 'nov' = 'November', 'dec' ='December')) %>% 
+  mutate_at(vars(year), as.character)
+
+```
+
+Merging SNP into POLS, then merging Unemployment:
+```{r}
+left_join(PM,SNP,by=c('year','month')) %>% 
+  left_join(UN,by=c('year','month'))
+```
+
+
+
+
 
 
 
